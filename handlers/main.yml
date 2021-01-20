@@ -1,0 +1,4 @@
+---
+- name: run refresh-ipset
+  shell: /usr/local/sbin/custom.refresh-ipset  # noqa 305
+  when: update_lists

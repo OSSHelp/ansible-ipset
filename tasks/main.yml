@@ -1,0 +1,89 @@
+---
+- name: deprecated param
+  fail:
+    msg: 'Warning: param update_lists is deprecated. It will be removed in the next version of the role.'
+  when: not update_lists
+  ignore_errors: true
+
+- name: package installation
+  apt:
+    name: "{{ ipset_packages }}"
+    state: present
+    update_cache: true
+    cache_valid_time: 86400
+
+- name: install script
+  get_url:
+    url: https://oss.help/scripts/tools/ipset/custom.refresh-ipset
+    dest: /usr/local/sbin/custom.refresh-ipset
+    checksum: "sha256:https://oss.help/scripts/tools/ipset/SHA256SUMS"
+    mode: 0700
+    validate_certs: false
+  when: not ansible_check_mode
+  notify: run refresh-ipset
+
+- name: create cronjob
+  file:
+    src: /usr/local/sbin/custom.refresh-ipset
+    dest: /etc/cron.daily/refresh-ipset
+    owner: root
+    group: root
+    state: link
+    force: yes
+
+- name: default and custom ipset lists union
+  set_fact:
+    ext_lists: "{{ ipset_default_lists|union(lists) }}"
+
+- name: ipset.list
+  lineinfile:
+    dest: /etc/network/ipset.list
+    regexp: "^create {{ item.name }}"
+    line: "create {{ item.name }} hash:net family {{ item.family }} hashsize 1024 maxelem 65536"
+    create: yes
+  with_items: "{{ ext_lists }}"
+  notify: run refresh-ipset
+  tags: molecule-idempotence-notest
+
+- name: create lists directory
+  file:
+    dest: /usr/local/etc/refresh-ipset
+    state: directory
+    mode: 0700
+
+- name: create lists files
+  template:
+    src: list.j2
+    dest: "/usr/local/etc/refresh-ipset/{{ item.name }}"
+  with_items: "{{ ext_lists }}"
+  when: item is defined and item.uri is defined and not ansible_check_mode
+  notify: run refresh-ipset
+
+- name: create ignore lists file
+  template:
+    src: ignore_list.j2
+    dest: "/usr/local/etc/refresh-ipset.ignore"
+  when: not ansible_check_mode
+
+- name: create dir /etc/nginx/access
+  file:
+    dest: /etc/nginx/access
+    state: directory
+    mode: 0755
+
+- name: create nginx access files
+  copy:
+    content: ''
+    dest: /etc/nginx/access/{{ item.name }}.conf
+    force: no
+    mode: 0644
+  with_items: "{{ ext_lists }}"
+  when: not ansible_check_mode
+  notify: run refresh-ipset
+
+- name: create custom lists
+  include_tasks: custom_list.yml
+  when: list.ips is defined
+  loop: "{{ ext_lists }}"
+  loop_control:
+    loop_var: list

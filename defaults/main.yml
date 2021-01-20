@@ -1,0 +1,14 @@
+---
+ipset_default_lists:
+  - {name: oss-v4, family: inet}
+  - {name: oss-v6, family: inet6}
+  - {name: oss-probe-v4, family: inet}
+  - {name: oss-probe-v6, family: inet6}
+
+lists: []
+
+ipset_packages:
+  - ipset
+  - curl
+
+update_lists: true

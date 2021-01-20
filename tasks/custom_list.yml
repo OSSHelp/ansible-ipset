@@ -1,0 +1,27 @@
+---
+- name: create list "{{ list.name }}" in file
+  lineinfile:
+    dest: /etc/network/ipset.list
+    regexp: "^add {{ list.name }} {{ item }}"
+    insertafter: "^create {{ list.name }}"
+    line: "add {{ list.name }} {{ item }}"
+  loop: "{{ list.ips }}"
+
+- name: get existing ipset lists
+  command: ipset list -n
+  register: existing_lists
+  changed_when: false
+
+- name: create list "{{ list.name }}"
+  command: "ipset create {{ list.name }} hash:net family {{ list.family }} hashsize 1024 maxelem 65536"
+  when: not ansible_check_mode and list.name not in existing_lists.stdout
+
+- name: get list elements
+  command: ipset list {{ list.name }}
+  register: list_elements
+  changed_when: false
+
+- name: add elements in "{{ list.name }}"
+  command: "ipset add {{ list.name }} {{ item }}"
+  when: not ansible_check_mode and item not in list_elements.stdout
+  loop: "{{ list.ips }}"
