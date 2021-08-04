@@ -12,3 +12,12 @@ ipset_packages:
   - curl
 
 update_lists: true
+
+refresh_ipset_version: 1-latest
+ipset_files:
+  - name: custom.refresh-ipset
+    url: "https://oss.help/scripts/tools/ipset/{{ refresh_ipset_version }}/custom.refresh-ipset"
+    dst_dir: /usr/local/sbin
+    chksum: "sha256:https://oss.help/scripts/tools/ipset/{{ refresh_ipset_version }}/SHA256SUMS"
+    mode: '0700'
+    validate_certs: false

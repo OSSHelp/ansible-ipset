@@ -14,11 +14,12 @@
 
 - name: install script
   get_url:
-    url: https://oss.help/scripts/tools/ipset/custom.refresh-ipset
-    dest: /usr/local/sbin/custom.refresh-ipset
-    checksum: "sha256:https://oss.help/scripts/tools/ipset/SHA256SUMS"
-    mode: 0700
-    validate_certs: false
+    url: "{{ item.url }}"
+    dest: "{{ item.dst_dir }}/{{ item.name }}"
+    mode: "{{ item.mode }}"
+    checksum: "{{ item.chksum }}"
+    validate_certs: "{{ item.validate_certs }}"
+  loop: "{{ ipset_files }}"
   when: not ansible_check_mode
   notify: run refresh-ipset
 
