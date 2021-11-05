@@ -3,4 +3,4 @@
   src: https://oss.help/ansible/pub/roles/l/2/lxc-reboot-stable.tar.gz
 
 - name: iptables
-  src: https://oss.help/ansible/pub/roles/i/3/iptables-stable.tar.gz
+  src: https://oss.help/ansible/pub/roles/i/4/iptables-stable.tar.gz

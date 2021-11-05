@@ -44,7 +44,6 @@
     create: yes
   with_items: "{{ ext_lists }}"
   notify: run refresh-ipset
-  tags: molecule-idempotence-notest
 
 - name: create lists directory
   file:

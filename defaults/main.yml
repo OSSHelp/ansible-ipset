@@ -13,7 +13,7 @@ ipset_packages:
 
 update_lists: true
 
-refresh_ipset_version: 1-latest
+refresh_ipset_version: 2-latest
 ipset_files:
   - name: custom.refresh-ipset
     url: "https://oss.help/scripts/tools/ipset/{{ refresh_ipset_version }}/custom.refresh-ipset"
